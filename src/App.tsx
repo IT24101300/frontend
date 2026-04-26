@@ -9,16 +9,39 @@ const API_URL = import.meta.env.VITE_API_URL;
 function App() {
   const [count, setCount] = useState(0)
   const [items, setItems] = useState([])
+  const [backendStatus, setBackendStatus] = useState<'checking' | 'connected' | 'error'>('checking')
 
   useEffect(() => {
     fetch(`${API_URL}/api/items`)
-      .then(res => res.json())
-      .then(data => setItems(data))
-      .catch(err => console.error('API error:', err))
+      .then(res => {
+        if (!res.ok) throw new Error('Not OK')
+        return res.json()
+      })
+      .then(data => {
+        setItems(data)
+        setBackendStatus('connected')
+      })
+      .catch(err => {
+        console.error('API error:', err)
+        setBackendStatus('error')
+      })
   }, [])
 
   return (
     <>
+      <div style={{
+        padding: '10px 20px',
+        textAlign: 'center',
+        fontWeight: 'bold',
+        background: backendStatus === 'connected' ? '#14532d' : backendStatus === 'error' ? '#7f1d1d' : '#1e3a5f',
+        color: '#fff'
+      }}>
+        Backend Status:{' '}
+        {backendStatus === 'checking' && '⏳ Checking...'}
+        {backendStatus === 'connected' && '✅ Connected'}
+        {backendStatus === 'error' && '❌ Backend not reachable'}
+      </div>
+
       <section id="center">
         <div className="hero">
           <img src={heroImg} className="base" width="170" height="179" alt="" />
