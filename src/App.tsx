@@ -1,11 +1,21 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
 import './App.css'
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function App() {
   const [count, setCount] = useState(0)
+  const [items, setItems] = useState([])
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/items`)
+      .then(res => res.json())
+      .then(data => setItems(data))
+      .catch(err => console.error('API error:', err))
+  }, [])
 
   return (
     <>
