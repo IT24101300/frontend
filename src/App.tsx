@@ -12,34 +12,35 @@ function App() {
   const [backendStatus, setBackendStatus] = useState<'checking' | 'connected' | 'error'>('checking')
 
   useEffect(() => {
-    fetch(`${API_URL}/api/items`)
+    // Check backend health
+    fetch(`${API_URL}/api/status`)
       .then(res => {
         if (!res.ok) throw new Error('Not OK')
         return res.json()
       })
-      .then(data => {
-        setItems(data)
-        setBackendStatus('connected')
-      })
-      .catch(err => {
-        console.error('API error:', err)
-        setBackendStatus('error')
-      })
+      .then(() => setBackendStatus('connected'))
+      .catch(() => setBackendStatus('error'))
+
+    // Fetch items
+    fetch(`${API_URL}/api/items`)
+      .then(res => res.json())
+      .then(data => setItems(data))
+      .catch(err => console.error('Items fetch error:', err))
   }, [])
 
   return (
     <>
       <div style={{
-        padding: '10px 20px',
+        padding: '12px 20px',
         textAlign: 'center',
         fontWeight: 'bold',
+        fontSize: '15px',
         background: backendStatus === 'connected' ? '#14532d' : backendStatus === 'error' ? '#7f1d1d' : '#1e3a5f',
         color: '#fff'
       }}>
-        Backend Status:{' '}
-        {backendStatus === 'checking' && '⏳ Checking...'}
-        {backendStatus === 'connected' && '✅ Connected'}
-        {backendStatus === 'error' && '❌ Backend not reachable'}
+        {backendStatus === 'checking' && '⏳ Connecting to backend...'}
+        {backendStatus === 'connected' && `✅ Backend Connected — ${items.length} item(s) loaded from MongoDB`}
+        {backendStatus === 'error' && '❌ Backend not reachable — check Render deployment'}
       </div>
 
       <section id="center">
